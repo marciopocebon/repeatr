@@ -16,3 +16,12 @@
 [submodule ".gopath/src/github.com/smartystreets/assertions"]
 	path = .gopath/src/github.com/smartystreets/assertions
 	url = http://github.com/smartystreets/assertions
+[submodule ".gopath/src/github.com/kisielk/gotool"]
+	path = .gopath/src/github.com/kisielk/gotool
+	url = https://github.com/kisielk/gotool
+[submodule ".gopath/src/github.com/kisielk/errcheck"]
+	path = .gopath/src/github.com/kisielk/errcheck
+	url = https://github.com/kisielk/errcheck
+[submodule ".gopath/src/golang.org/x/tools"]
+	path = .gopath/src/golang.org/x/tools
+	url = https://github.com/golang/tools

@@ -64,6 +64,13 @@ else
 		shift
 		go install github.com/smartystreets/goconvey && "$GOPATH"/bin/goconvey "$@"
 		;;
+	errcheck)
+		shift
+		# errcheck shoots itself if GOROOT is not explictly set -.-
+		# We could set GOROOT globally up top, the way we set GOPATH.
+		# also, absolute folder paths. we has them. so many. fire the sed cannons. and just... cannons.
+		go install github.com/kisielk/errcheck && GOROOT=`go env GOROOT` "$GOPATH"/bin/errcheck "$@" 2>&1 | sed -e "s|${GOPATH}src/||"
+		;;
 	cover)
 		coverFile="$GOPATH/tmp/cover/cover.out"
 		mkdir -p "$(dirname "$coverFile")"
@@ -114,7 +121,7 @@ else
 		PATH=$PWD/assets:$PATH $GOPATH/bin/$name "$@"
 		;;
 	*)
-		echo "Usage: $0 {init|test|install|fmt|doc|cover|validate|clean}" 1>&2;
+		echo "Usage: $0 {init|test|install|fmt|doc|convey|errcheck|cover|validate|clean}" 1>&2;
 		exit 1
 	;;
 esac
