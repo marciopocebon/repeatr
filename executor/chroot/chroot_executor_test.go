@@ -139,4 +139,48 @@ func Test(t *testing.T) {
 			}),
 		),
 	)
+
+	Convey("Bouncing the rootfs should result in no change", t,
+		// We could multiplex this test over input and output types too,
+		//  but what we're really looking for here is edge cases around
+		//  the rootfs, in case the executor diddles some bits on '/'
+		//  inappropriately.  Everything else should be covered by the
+		//  IO system's own unit tests.
+		testutil.Requires(
+			testutil.RequiresRoot,
+			testutil.WithTmpdir(func() {
+				formula := def.Formula{
+					Inputs: []def.Input{
+						{
+							Type:     "tar",
+							Location: "/",
+							Hash:     "b6nXWuXamKB3TfjdzUSL82Gg1avuvTk0mWQP4wgegscZ_ZzG9GfHDwKXQ9BfCx6v",
+							URI:      filepath.Join(projPath, "assets/ubuntu.tar.gz"),
+						},
+					},
+					Accents: def.Accents{
+						Entrypoint: []string{"echo"},
+					},
+					Outputs: []def.Output{
+						{
+							Type:     "tar",
+							Location: "/",
+							URI:      "/dev/null", // this should go away when io-reorg is fully landed and we thus get scan-without-warehouse support
+						},
+					},
+				}
+				e := &Executor{
+					workspacePath: "chroot_workspace",
+				}
+				So(os.Mkdir(e.workspacePath, 0755), ShouldBeNil)
+
+				job := e.Start(formula, def.JobID(guid.New()), ioutil.Discard)
+				jobResult := job.Wait()
+				So(jobResult.ExitCode, ShouldEqual, 0)
+				So(jobResult.Error, ShouldBeNil)
+				So(len(jobResult.Outputs), ShouldEqual, 1)
+				So(jobResult.Outputs[0].Hash, ShouldEqual, formula.Inputs[0].Hash)
+			}),
+		),
+	)
 }
