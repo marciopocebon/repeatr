@@ -75,7 +75,6 @@ func ReadMetadata(path string, optional ...os.FileInfo) Metadata {
 		panic(errors.IOError.Wrap(err))
 	}
 	// handle extra metadata on the interesting types
-	// not handled: hardlinks
 	switch hdr.Typeflag {
 	case tar.TypeSymlink:
 		// readlink needs the file path again  ヽ(´ー｀)ノ
@@ -84,6 +83,11 @@ func ReadMetadata(path string, optional ...os.FileInfo) Metadata {
 		}
 	case tar.TypeBlock, tar.TypeChar:
 		hdr.Devmajor, hdr.Devminor = fspatch.ReadDev(fi)
+	case tar.TypeReg:
+		// may be a hardlink.
+		// hardlinks are not context free and this function's interface is.
+		// so, not handled: hardlinks.
+		// we could keep the context freedom and still implement this by adding nlink and inode to Metadata.
 	}
 	// ctimes are uncontrollable, pave them (╯°□°）╯︵ ┻━┻
 	// atimes mutate on read, pave them
